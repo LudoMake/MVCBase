@@ -73,7 +73,8 @@ public class NuevaEditorialDialog extends JDialog {
 		}
 		{
 			spinnerAnio = new JSpinner();
-			spinnerAnio.setModel(new SpinnerNumberModel(Integer.valueOf(2023), Integer.valueOf(1900), null, Integer.valueOf(1)));
+			spinnerAnio.setModel(
+					new SpinnerNumberModel(Integer.valueOf(2023), Integer.valueOf(1900), null, Integer.valueOf(1)));
 			contentPanel.add(spinnerAnio, "cell 2 5,growx");
 		}
 		{
@@ -85,14 +86,13 @@ public class NuevaEditorialDialog extends JDialog {
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						Editorial ed = validarDatos();
-						
-						if (e!=null) {
+
+						if (e != null) {
 							try {
 								controlador.insertarEditorial(ed);
 							} catch (BBDDException e1) {
-								JOptionPane.showConfirmDialog(contentPanel, 
-										e1.getMessage(),
-										"Error insertando los datos",JOptionPane.ERROR_MESSAGE);
+								JOptionPane.showConfirmDialog(contentPanel, e1.getMessage(),
+										"Error insertando los datos", JOptionPane.ERROR_MESSAGE);
 							}
 						}
 					}
@@ -103,6 +103,11 @@ public class NuevaEditorialDialog extends JDialog {
 			}
 			{
 				JButton cancelButton = new JButton("Cancelar");
+				cancelButton.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						setVisible(false);
+					}
+				});
 				cancelButton.setActionCommand("Cancel");
 				buttonPane.add(cancelButton);
 			}
@@ -111,25 +116,23 @@ public class NuevaEditorialDialog extends JDialog {
 
 	protected Editorial validarDatos() {
 		Editorial ed = null;
-		
+
 		try {
 			String nombre = txtNombre.getText();
 			int anio = (int) spinnerAnio.getValue();
-			
-			
+
 			ed = new Editorial(nombre, anio);
 		} catch (NumberFormatException e) {
-			JOptionPane.showConfirmDialog(contentPanel, 
-					"Debe introducir un número válido en código Editorial",
-					"error en los datos",JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showConfirmDialog(contentPanel, "Debe introducir un número válido en código Editorial",
+					"error en los datos", JOptionPane.ERROR_MESSAGE);
 			return ed;
 		}
 		return ed;
 	}
 
 	public void setControlador(Controlador controlador) {
-		this.controlador=controlador;
-		
+		this.controlador = controlador;
+
 	}
 
 }

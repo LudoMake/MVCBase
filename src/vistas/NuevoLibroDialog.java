@@ -155,7 +155,7 @@ public class NuevoLibroDialog extends JDialog {
 						
 						if (l!=null) {
 							try {
-								controlador.insertaLibro(l);
+								controlador.insertarLibro(l);
 							} catch (BBDDException e1) {
 								JOptionPane.showConfirmDialog(contentPanel, 
 										e1.getMessage(),

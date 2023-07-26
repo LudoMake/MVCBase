@@ -6,17 +6,24 @@ import excepciones.CantidadDebeSerPositivaException;
 
 public class Editorial {
 	private String nombre;
-	private int codEditorial;
+	private int codEditorial; //integer para añadir numeros nulos
 	private int anio;
 
 	public Editorial(String nombre, int codEditorial, int anio) {
 		super();
 		this.codEditorial = codEditorial;
-		// llamamos al setter para ejercer el control de valores negativos
-		this.setCodEditorial(codEditorial);
-		this.setAnio(anio);
+		this.nombre=nombre;
+		this.anio=anio;
 
 	}
+	
+	public Editorial(String nombre, int anio) {
+		super();
+		this.nombre=nombre;
+		this.anio=anio;
+
+	}
+	
 
 	public String getNombre() {
 		return nombre;

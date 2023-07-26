@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import excepciones.BBDDException;
 import excepciones.CantidadDebeSerPositivaException;
 import modelo.Editorial;
-import modelo.Libro;
 import utilidades.ConexionBD;
 
 public class EditorialDAO {
@@ -34,7 +33,7 @@ public class EditorialDAO {
 	 * @throws CantidadDebeSerPositivaException cuando se recogen valores negativos en cantidad
 	 * @throws BBDDException se produce error en la base de datos
 	 */
-	public ArrayList<Editorial> getAllLibros() {
+	public ArrayList<Editorial> getAllEditoriales() throws BBDDException {
 		// instanciamos la lista
 		ArrayList<Editorial> lista = new ArrayList<Editorial>();
 		
@@ -81,17 +80,17 @@ public class EditorialDAO {
 	}
 	
 	/**
-	 * Método que devuelve un Libro dado el isbn pasado como parámetro
-	 * @param isbn isbn a buscar
-	 * @return Libro con los datos del libro buscado si se ha encontrado, o 
-	 * null si el libro no existe
+	 * Método que devuelve una Editorial dado el codEditorial pasado como parámetro
+	 * @param codEditorial codEditorial a buscar
+	 * @return Editorial con los datos de la editorial buscado si se ha encontrado, o 
+	 * null si la editorial no existe
 	 * @throws CantidadDebeSerPositivaException 
 	 * @throws BBDDException 
 	 */
-	public Libro getLibro(String isbn) throws CantidadDebeSerPositivaException, BBDDException {
-		Libro l = null;
+	public Editorial getEditorial(int codEditorial) throws BBDDException {
+		Editorial ed = null;
 		
-		String consulta = "select * from libros where isbn = "+isbn;
+		String consulta = "select * from editoriales where codEditorial = "+codEditorial;
 		
 		try {
 			// Conectamos con la base de datos
@@ -106,17 +105,13 @@ public class EditorialDAO {
 			if(resultado.next()) {
 				
 				// recogemos todos los datos invocando a los método  getters correspondientes
-				String titulo = resultado.getString("titulo");
-				int codEditorial = resultado.getInt("CodEditorial");
+				String nombre = resultado.getString("nombre");
 				int anio = resultado.getInt("anio");
-				int numPags = resultado.getInt("num_pags");
-				double precio = resultado.getDouble("precio");
-				int cantidad = resultado.getInt("cantidad");
-				double precioCD= resultado.getDouble("precioCD");
+				//no hace falta recoger el codEditorial
+				
 				
 				// Instanciamos el objeto de tipo Libro
-				l = new Libro(isbn, titulo, codEditorial, anio, numPags, precio, 
-						cantidad, precioCD);
+				ed = new Editorial(nombre, codEditorial, anio);
 				
 			}
 		} catch (SQLException e) {
@@ -132,32 +127,25 @@ public class EditorialDAO {
 			}
 			
 		}
-		return l;
+		return ed;
 	}
 	
 	/**
-	 * Método que inserta un libro en la base de datos
-	 * @param l Libro a insertar
+	 * Método que inserta una editorial en la base de datos
+	 * @param e Editorial a insertar
 	 * 
 	 */
-	public void insertarLibro(Libro l) throws BBDDException {
+	public void insertarEditorial(Editorial ed) throws BBDDException {
 		try {
 			con=this.conexion.getConexion();
-			String consulta= "insert into libros "
-					+ "values(?, ?, ?, ?, ?, ?, ?, ? )";
+			String consulta= "insert into editoriales (nombre,anio)"
+					+ "values(?, ?)";
 			
 			sentenciaPrep=con.prepareStatement(consulta);
 			
-			// incializamos la sentencia preparada indicando porque valor debe sustituir 
-			// las interrogaciones
-			sentenciaPrep.setString(1, l.getIsbn());
-			sentenciaPrep.setString(2, l.getTitulo());
-			sentenciaPrep.setInt(3, l.getCodEditorial());
-			sentenciaPrep.setInt(4, l.getAnio());
-			sentenciaPrep.setInt(5, l.getNumPags());
-			sentenciaPrep.setDouble(6, l.getPrecio());
-			sentenciaPrep.setInt(7, l.getCantidad());
-			sentenciaPrep.setDouble(8, l.getPrecioCD());
+			// incializamos la sentencia preparada indicando por qué valor debe sustituir las interrogaciones
+			sentenciaPrep.setString(1, ed.getNombre());		
+			sentenciaPrep.setInt(2, ed.getAnio());
 			
 			sentenciaPrep.executeUpdate();
 			
@@ -166,7 +154,7 @@ public class EditorialDAO {
 			System.out.println("Error al insertar "+e1.getMessage()+e1.getErrorCode());
 			// controlamos si se ha el duplicado la calve primaria
 			if (e1.getErrorCode()==1062) {
-				throw new BBDDException("Error insertando. Clave duplicado");
+				throw new BBDDException("Error insertando. Clave duplicada");
 			} else if (e1.getErrorCode()==1216) {
 				throw new BBDDException("Código Editorial no existe");
 			}
@@ -183,30 +171,22 @@ public class EditorialDAO {
 	}
 	
 	/**
-	 * Método de la clase que edita un libro en la base de datos
-	 * @param l Libro a insertar
+	 * Método de la clase que edita una editorial en la base de datos
+	 * @param e Editorial a insertar
 	 * @throws ErrorBBDDException en caso de que no se haya podido editar
 	 */
-	public void editarLibro (Libro l) throws BBDDException {
+	public void editarEditorial (Editorial ed) throws BBDDException {
 		try {
 			con=this.conexion.getConexion();
-			String consulta= "update libros set titulo=?, codEditorial=?, anio=?, num_pags=?,"
-					+ " precio = ?, cantidad=?, precioCD=?"
-					+ " where isbn=?";
+			String consulta= "update editorial set nombre=?, codEditorial=?, anio=?, num_pags=? where codEditorial=?";
 			
 			sentenciaPrep=con.prepareStatement(consulta);
 			
-			// incializamos la sentencia preparada indicando porque valor debe sustituir 
-			// las interrogaciones
+			// incializamos la sentencia preparada indicando por qué valor debe sustituir las interrogaciones
 			
-			sentenciaPrep.setString(1, l.getTitulo());
-			sentenciaPrep.setInt(2, l.getCodEditorial());
-			sentenciaPrep.setInt(3, l.getAnio());
-			sentenciaPrep.setInt(4, l.getNumPags());
-			sentenciaPrep.setDouble(5, l.getPrecio());
-			sentenciaPrep.setInt(6, l.getCantidad());
-			sentenciaPrep.setDouble(7, l.getPrecioCD());
-			sentenciaPrep.setString(8, l.getIsbn());
+			sentenciaPrep.setString(1, ed.getNombre());
+			sentenciaPrep.setInt(2, ed.getCodEditorial());
+			sentenciaPrep.setInt(3, ed.getAnio());
 			
 			sentenciaPrep.executeUpdate();
 			
@@ -214,7 +194,7 @@ public class EditorialDAO {
 		} catch (SQLException e1) {
 			System.out.println("Error al insertar "+e1.getMessage()+e1.getErrorCode());
 
-			throw new BBDDException("Error editando el empleado.");
+			throw new BBDDException("Error editando el codEditorial.");
 		} finally {
 			try {
 				sentenciaPrep.close();
@@ -227,22 +207,21 @@ public class EditorialDAO {
 	}
 	
 	/**
-	 * Método que elimina un libro de la tabla de la base de datos
-	 * @param isbn String con el isbn del libro a borrar
+	 * Método que elimina una editorial de la tabla de la base de datos
+	 * @param codEditorial int con el codEditorial de la editorial a borrar
 	 * @return true en caso de borrado satisfactorio y false en caso contrario
 	 * @throws BBDDException 
 	 */
-	public boolean eliminarLibro(String isbn) throws BBDDException {
+	public boolean eliminarEditorial(String codEditorial) throws BBDDException {
 		boolean res=false;
 		try {
 			con=this.conexion.getConexion();
-			String consulta= "delete from libros where isbn=?";
+			String consulta= "delete from editoriales where codEditorial=?";
 			
 			sentenciaPrep=con.prepareStatement(consulta);
 			
-			// incializamos la sentencia preparada indicando porque valor debe sustituir 
-			// las interrogaciones
-			sentenciaPrep.setString(1, isbn);
+			// incializamos la sentencia preparada indicando porque valor debe sustituir las interrogaciones
+			sentenciaPrep.setString(1, codEditorial);
 
 			sentenciaPrep.executeUpdate();
 			res=true;
@@ -261,6 +240,4 @@ public class EditorialDAO {
 		}
 		return res;
 	}
-}
-
 }
